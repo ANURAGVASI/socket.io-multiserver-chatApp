@@ -1,0 +1,13 @@
+.side-bar-parent{
+    float: left;
+    width: 19%;
+    border: 2px solid red;
+    height: 100vh;
+  }
+  
+  .chat-window-parent{
+    float: left;
+    width: 79%;
+    border:2px solid red;
+    height: 100vh;
+  }

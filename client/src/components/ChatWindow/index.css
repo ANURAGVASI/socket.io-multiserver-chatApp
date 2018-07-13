@@ -1,0 +1,7 @@
+.chat-window{
+  height: 80vh;
+  background-color: #222;
+  color: #eee;
+  font-family: monospace;
+  padding: 2rem;
+}

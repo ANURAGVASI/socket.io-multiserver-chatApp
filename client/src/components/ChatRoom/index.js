@@ -18,21 +18,23 @@ class Chatroom extends React.Component{
             isEstablishingSession: false,
             chattingWith: null,
             socket: null,
-            onlineUsers : []
+            onlineUsers : [],
+            myMessages: []
         }
     }
 
     // React life cycle hoo. redirect to login page
     // if n user cookies are found..
     componentWillMount(){
-        if(!cookie.load('user')){
-            console.log('no cookie found..redirecting to login.');
-            this.props.history.push('/');       
+        if(cookie.load('user')){
+            console.log('usr cookie...cookie found');
         }
         else{
-            console.log('user cookie found...continue to establish session..');
+            console.log('no cookie found..redirecting to login.');
+            this.props.history.push('/');   
         }
     }
+    
     
 
     // react life cycle hook. Establish socket if sucessfully mounted
@@ -88,16 +90,23 @@ class Chatroom extends React.Component{
                         let olUsers = this.state.onlineUsers;
                         olUsers.splice(index,1);
                         console.log("online users are **",olUsers);
-                        this.setState({onlineUsers:olUsers});
+                        const messages = this.state.myMessages.filter((message) => {
+                            if(message.from!==user && message.to!==user)
+                                return message;
+                        });
+
+                        this.setState({onlineUsers:olUsers,myMessages:messages});
                     }
                 })
 
                 socket.on('accessgranted',(users) => {
                     console.log('user session established....');
                     this.setState({socket: socket})
-                    let index= users.indexOf(cookie.load('user').email);
-                    if(index>-1){
-                        users.splice(index,1);
+                    if(cookie.load('user')){
+                        let index= users.indexOf(cookie.load('user').email);
+                        if(index>-1){
+                            users.splice(index,1);
+                        }
                     }
                     console.log("online users",users);
                     this.setState({onlineUsers: users});
@@ -105,32 +114,47 @@ class Chatroom extends React.Component{
 
                 socket.on('newMessage',(msg) => {
                     console.log('got new message',msg);
+                    const messages = this.state.myMessages;
+                    messages.push({
+                        from: msg.from,
+                        text: msg.text,
+                        time: Date.now(),
+                        type: 'from'
+                    })
+                    this.setState({myMessages: messages});
                 })
             })
         });
     }
 
-    
+    sentMessage = (touser,message) => {
+        const messages = this.state.myMessages;
+        messages.push({
+            to: touser,
+            text: message,
+            time: Date.now(),
+            type: 'to'
+        });
+        this.setState({myMessages: messages});
+    }
+
     chatWithuser(user){
         this.setState({chattingWith:user})
     }
 
     render(){
+        console.log('renderingg', cookie.load('user'));
         const chattingWith=this.state.chattingWith || this.state.onlineUsers[0]
         return(
             <div>
-                
                 <div className="side-bar-parent" >
                     <Sidebar   chatWithuser={this.chatWithuser.bind(this)} cookie={cookie} users={this.state.onlineUsers} />
                 </div>
-                    
                 <div className="chat-window-parent" >
-                    <ChatUser  chattingWith={chattingWith} />
-                    <ChatWindow />
-                    <TextInput chatWithuser={chattingWith} socket={this.state.socket} /> 
-                    
+                    <ChatUser cookie={cookie}  chattingWith={chattingWith} />
+                    <ChatWindow chattingWith={chattingWith} messages={this.state.myMessages} />
+                    <TextInput sentMessage={this.sentMessage.bind(this)} chatWithuser={chattingWith} socket={this.state.socket} /> 
                 </div>
-
              </div>
         )
     }

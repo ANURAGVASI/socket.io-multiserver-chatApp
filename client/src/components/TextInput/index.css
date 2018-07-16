@@ -1,0 +1,29 @@
+.enter-message{
+    padding: 10px;
+    border-radius: 15px;
+    border: 1px solid rgb(170, 169, 169);
+    margin-left: 20px;
+    width: 100%;
+    outline: none;
+    background-color: rgb(238, 235, 235)
+}
+
+.text-input-class{
+    margin-bottom: 20px;
+}
+
+.send-message-btn{
+    border: 0px;
+    padding-left:5px;
+    padding-right: 5px;
+    padding-top: 8px;
+    padding-bottom: 6px;
+    margin-left: 20px;
+    background-color: rgb(238, 235, 235);
+    border: 1px solid rgb(170, 169, 169);
+    width: 80px;
+}
+
+.send-message-btn:hover{
+    cursor: pointer;
+}

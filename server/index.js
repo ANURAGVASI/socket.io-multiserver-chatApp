@@ -9,6 +9,7 @@ const express = require('express');
 const redis = require('socket.io-redis'); 
 const socketio = require('socket.io');
 const path = require('path');
+const memored = require('memored');
 const circularjson = require('circular-json');
 
 if(cluster.isMaster){
@@ -24,39 +25,14 @@ if(cluster.isMaster){
 
         // handling process.send message events in master
         workers[i].on('message',(msg) => {
-          if(msg.cmd==='addNewClient'){
-              console.log(" master is notified about new client by worker",workers[i].id);
-              // notifying all clients
-              notifyAllClients(i,msg);
-          }
-          if(msg.cmd==='deleteClient'){
-            console.log(" master is notified about client disconnect by worker",workers[i].id);
-            deleteClient(msg);
-          }
           if(msg.cmd==='newMessage'){
-              console.log("master is notified about ne message by worker",workers[i].id);
+              console.log("master is notified about new message by worker",workers[i].id);
               sendNewmessage(msg);
           }
         })
     }
 
     // notifying all workers about new client
-    notifyAllClients = (index,msg) => {
-        workers.map((worker,i) => {
-            if(i!==index)
-            worker.send({
-                ...msg
-            });
-        })
-    }
-    // delete client on disconnect
-    deleteClient = (msg) => {
-        workers.map((worker) => {
-            worker.send({
-                ...msg
-            })
-        })
-    }
     sendNewmessage = (msg) => {
         workers[msg.workerID-1].send({
            ...msg 
@@ -87,8 +63,11 @@ if(cluster.isMaster){
 
 
     process.on('SIGINT',() => {
-        console.log('cleaning up server...');
+        console.log('cleaning up master server...');
         server.close();
+        memored.clean(() => {
+            onsole.log('cleaned memory..');
+        })
         process.exit(1);
     });
 
@@ -128,43 +107,53 @@ else{
             }
             else{
                 // adding to clients list
-                // console.log("emit function",socket.emit);
                 socket.email = data.email;
-                socket.username = data.username;
                 socket.clientIP = data.clientIP;
                 socket.workerID = cluster.worker.id;
                 clients[data.email] = socket;
-                // notifying master(indeed all other workers)
-                var cache = [];
-                process.send({
-                    cmd:'addNewClient',
-                    email: data.email,
-                    username: data.username,
-                    client: circularjson.stringify(clients[data.email]) 
+
+                // storing client-worker relation in memory
+                memored.store(data.email,{
+                    workerID : cluster.worker.id
+                },() => {
+                    console.log("*8stored in memory**");
+                    memored.keys((err,keys) => {
+                        console.log('session created..available users',keys);
+                        socket.emit('accessgranted',keys);
+                        socket.broadcast.emit('newClientOnline',{
+                            email: data.email
+                        })
+                    })                  
                 });
-                // broadcasting event
-                socket.broadcast.emit('newClientOnline',{
-                    email: data.email,
-                    username: data.username
-                });
-               
-                console.log('session created..available users',Object.keys(clients));
-                
-                socket.emit('accessgranted',Object.keys(clients));
             }
-
-        })
-
+        });
 
         // new Message event from client...redirect to appropriate client
         socket.on('newMessage', (message) => {
             console.log('message arrived',message);
-            process.send({
-                cmd:'newMessage',
-                to: message.to,
-                text: message.message,
-                workerID: clients[message.to].workerID
-            })
+            // getting mapped workerID from memory
+             memored.read(message.to,(err,val) => {
+                 if(err){
+                     console.log(err);
+                 }
+                 else{
+                     if(val)
+                    // send message to mater..master will redirect
+                    // to appropriate worker
+                     process.send({
+                         cmd:'newMessage',
+                         to: message.to,
+                         from: socket.email,
+                         text: message.message,
+                         workerID : val.workerID
+                     })
+                     else{
+                        //  client offline suport---in dev
+                        console.log('requested  client offline');
+                        socket.emit('clientNotFound');
+                     }
+                 }
+             })
         })
 
         // disonnet event when a client disconnects
@@ -172,10 +161,10 @@ else{
             console.log('client disconnected...',socket.id);
             console.log('deleting client..');
             // notifying master about client disconnect 
-            process.send({
-                cmd:'deleteClient',
-                email: socket.email
-            })
+            delete clients[socket.email];
+            memored.remove(socket.email,()=>{
+                console.log('client removed from memory');
+            });
             socket.broadcast.emit('clientOffline',socket.email);
         });
     });
@@ -188,23 +177,10 @@ else{
                 data.resume();
                 break;
 
-            case "addNewClient":
-                const newClientSocket = circularjson.parse(obj.client)
-                if(obj.workerID!==cluster.worker.id){
-                    clients[obj.email]= newClientSocket;
-                    console.log("added new client by worker...",cluster.worker.id);
-                }
-                break;
-
-            case "deleteClient":
-                delete clients[obj.email];
-                console.log("client deleted froworker...",cluster.worker.id);
-                break;
-
             case "newMessage":
-                console.log("message handled by"+obj.text);
+                console.log("message handled by"+ cluster.worker.id);
                 clients[obj.to].emit("newMessage",{
-                    from: obj.to,
+                    from: obj.from ,
                     text: obj.text
                 });
                 break;
@@ -218,5 +194,5 @@ else{
         console.log('cleaning up process...');
         Expserver.close();
         process.exit(1);
-    })
+    });
 }

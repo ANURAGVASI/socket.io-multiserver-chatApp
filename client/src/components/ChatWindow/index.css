@@ -1,7 +1,33 @@
 .chat-window{
-  height: 80vh;
-  background-color: #222;
-  color: #eee;
-  font-family: monospace;
+  height: 77vh;
+  font-size: 15px;
   padding: 2rem;
+  overflow: auto;
+}
+
+.from-div{
+  margin-top: 20px;
+  text-align: right;
+  color: white;
+  
+}
+
+.to-div{
+  margin-top: 20px;
+  text-align: left;
+  color: white;
+}
+.to-message{
+ background-color: rgb(35, 180, 35);
+ padding: 10px;
+ margin-right: 400px;
+ margin-top: 10px;
+ float: left;
+}
+.from-message{
+  background-color: rgb(64, 185, 175);
+ padding: 10px;
+ margin-left: 400px;
+ margin-top: 10px;
+ float: right;
 }

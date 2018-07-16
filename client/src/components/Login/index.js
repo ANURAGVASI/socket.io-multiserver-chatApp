@@ -25,8 +25,8 @@ import $ from 'jquery';
         }
     }
 
-    isvalid = (email,username) => {
-        if(email && username){
+    isvalid = (email) => {
+        if(email ){
             return true;
         }
         return false;
@@ -35,11 +35,11 @@ import $ from 'jquery';
     handleLogin = () => {
         // validating user data
         const email = $(".useremail").val();
-        const username = $(".username").val();
+        // const username = $(".username").val();
         
-        if(this.isvalid(email,username)){
+        if(this.isvalid(email)){
             // enter chat room
-            cookie.save('user',{email,username});
+            cookie.save('user',{email});
             this.props.history.push('/chatroom');
         }
         else{
@@ -51,9 +51,9 @@ import $ from 'jquery';
     render(){
         return(
             <div>
-                <input type="text" className="useremail" placeholder="email" name="email" />
+                <input type="text" className="useremail" placeholder="username" name="email" />
                 <br/>
-                <input typ="text" className="username" placeholder="username" name="username" />
+                {/* <input typ="text" className="username" placeholder="username" name="username" /> */}
                 <br/>
                 <button onClick={this.handleLogin} >Enter Chat Room</button>
                 <br/>

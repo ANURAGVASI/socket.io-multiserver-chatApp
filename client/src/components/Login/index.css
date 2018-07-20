@@ -1,0 +1,36 @@
+.useremail{
+    display: block;
+    margin : 0 auto;
+    padding: 7px;
+    font-size: 16px;
+    margin-top: 30px;
+    width: 20%;
+    border: 2px solid rgb(44, 139, 216);
+    box-shadow: 0px 0px 8px 0.5px rgb(104, 177, 236);
+    outline: none;
+}
+.login-btn{
+    display: block;
+    margin : 0 auto;
+    margin-top: 30px;
+    background-color: rgb(44, 139, 216);
+    color: white;
+    border: 1px solid silver;
+    padding: 10px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    outline: none;
+    
+}
+.login-btn:hover{
+    cursor: pointer;
+    box-shadow: 0px 0px 10px 0.5px rgb(104, 177, 236);
+}
+.welcome-text{
+    text-align: center;
+    margin-top: 160px;
+    font-size: 30px;
+}
+.error-text{
+    text-align: center;
+}

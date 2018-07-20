@@ -3,6 +3,7 @@ import 'whatwg-fetch';
 import {withRouter} from 'react-router-dom';
 import cookie from 'react-cookies';
 import $ from 'jquery';
+import './index.css';
 
  class Login extends React.Component{
 
@@ -49,19 +50,23 @@ import $ from 'jquery';
     }
 
     render(){
+        this.state.error = (this.state.error)?this.state.error :this.props.error;
         return(
             <div>
-                <input type="text" className="useremail" placeholder="username" name="email" />
-                <br/>
-                {/* <input typ="text" className="username" placeholder="username" name="username" /> */}
-                <br/>
-                <button onClick={this.handleLogin} >Enter Chat Room</button>
-                <br/>
-                {
-                    (this.state.showErrors)
-                    ? <p style={{color: 'red'}} >{this.state.error}</p>
-                    : null
-                }
+                <div>
+                    <p className="welcome-text" >Welcome!! to Real Time Chat Application</p>
+                </div>
+                <div className="input-div" >
+                    <input type="text" className="useremail" placeholder="Username" name="email" />
+                    {/* <input typ="text" className="username" placeholder="username" name="username" /> */}
+                    <button className="login-btn" onClick={this.handleLogin} >Enter Chat Room</button>
+                    <br/>
+                    {
+                        (this.state.showErrors)
+                        ? <p className="error-text" style={{color: 'red'}} >{this.state.error}</p>
+                        : null
+                    }
+                </div>
             </div>
         )
     }

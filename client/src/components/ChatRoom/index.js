@@ -19,13 +19,16 @@ class Chatroom extends React.Component{
             chattingWith: null,
             socket: null,
             onlineUsers : [],
-            myMessages: []
+            myMessages: [],
+            errorMsg : null,
+            isloading:false
         }
     }
 
     // React life cycle hoo. redirect to login page
     // if n user cookies are found..
     componentWillMount(){
+        this.setState({isloading:true});
         if(cookie.load('user')){
             console.log('usr cookie...cookie found');
         }
@@ -49,19 +52,27 @@ class Chatroom extends React.Component{
 
             // checking for socket connection
             socket.on('connect',() => {
+                this.setState({isloading: true});
                 console.log('socket established successfully with server..');
                 console.log('requesting user session..');
                 socket.emit('createsession',{...cookie.load('user'),clientIP});
+                socket.on('usernametaken',() => {
+                    alert("username already taken please use another");
+                    cookie.remove('user');
+                    this.props.history.push('/');
+                });
                 socket.on('accessdenied',(data) => {
+                    this.setState({isloading:false});
                     // check if user session already present
                     if(data.err = "alreadyrunning"){
-                        console.log('session already running at',data.address);
+                        console.log('session with username:'+cookie.load('user').email+'already running at',data.address);
                         if(clientIP === data.address){
                             // redirect to error page
                             this.props.history.push('/error');
                         }
                     }
                     else{
+                        this.setState({isloading:false});
                         console.log('error creating your session..');
                         console.log('clearing cookies..redirecting to login page');
                         cookie.remove('user');
@@ -100,6 +111,7 @@ class Chatroom extends React.Component{
                 })
 
                 socket.on('accessgranted',(users) => {
+                    this.setState({isloading:false});
                     console.log('user session established....');
                     this.setState({socket: socket})
                     if(cookie.load('user')){
@@ -146,7 +158,9 @@ class Chatroom extends React.Component{
         console.log('renderingg', cookie.load('user'));
         const chattingWith=this.state.chattingWith || this.state.onlineUsers[0]
         return(
-            <div>
+            this.state.isloading
+            ? <p>Establishing connection please wait....</p>
+            :<div>
                 <div className="side-bar-parent" >
                     <Sidebar   chatWithuser={this.chatWithuser.bind(this)} cookie={cookie} users={this.state.onlineUsers} />
                 </div>
@@ -155,8 +169,10 @@ class Chatroom extends React.Component{
                     <ChatWindow chattingWith={chattingWith} messages={this.state.myMessages} />
                     <TextInput sentMessage={this.sentMessage.bind(this)} chatWithuser={chattingWith} socket={this.state.socket} /> 
                 </div>
-             </div>
-        )
+            </div>
+        );
+        
+      
     }
 }
 

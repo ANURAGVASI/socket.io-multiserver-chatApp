@@ -101,30 +101,43 @@ else{
         // Accept login event with user data
         socket.on('createsession',(data) => {
             console.log('creating session for...',data);
-            if(data && clients[data.email]){
-                console.log('already session available for user.',clients[data.email].email);
-                socket.emit('accessdenied',{err:'alreadyrunning',address:clients[data.email].clientIP});
-            }
-            else{
-                // adding to clients list
-                socket.email = data.email;
-                socket.clientIP = data.clientIP;
-                socket.workerID = cluster.worker.id;
-                clients[data.email] = socket;
-
-                // storing client-worker relation in memory
-                memored.store(data.email,{
-                    workerID : cluster.worker.id
-                },() => {
-                    console.log("*8stored in memory**");
-                    memored.keys((err,keys) => {
-                        console.log('session created..available users',keys);
-                        socket.emit('accessgranted',keys);
-                        socket.broadcast.emit('newClientOnline',{
-                            email: data.email
-                        })
-                    })                  
-                });
+            let user = null;
+            if(data && data.email){
+                console.log("email", data.email);
+                memored.read(data.email, (err, val) => {
+                    if(val){
+                        socket.emit('usernametaken',{err:'alreadyrunning',address:val.clientIP});
+                    }
+                    else{
+                        if(data && (clients[data.email] || user)){
+                            console.log('already session available for user.',clients[data.email].email);
+                            socket.emit('accessdenied',{err:'alreadyrunning',address:clients[data.email].clientIP});
+                        }
+                        else{
+                            console.log("in else adding user", user);
+                            // adding to clients list
+                            socket.email = data.email;
+                            socket.clientIP = data.clientIP;
+                            socket.workerID = cluster.worker.id;
+                            clients[data.email] = socket;
+            
+                            // storing client-worker relation in memory
+                            memored.store(data.email,{
+                                clientIP: data.clientIP,
+                                workerID : cluster.worker.id
+                            },() => {
+                                console.log("*8stored in memory**");
+                                memored.keys((err,keys) => {
+                                    console.log('session created..available users',keys);
+                                    socket.emit('accessgranted',keys);
+                                    socket.broadcast.emit('newClientOnline',{
+                                        email: data.email
+                                    })
+                                })                  
+                            });
+                        }
+                    }
+                })
             }
         });
 
@@ -154,6 +167,16 @@ else{
                      }
                  }
              })
+        });
+
+        // logout event when client logs out
+        socket.on('logout', () =>{
+            delete clients[socket.email];
+            memored.remove(socket.email,()=>{
+                console.log('client removed from memory');
+            });
+            socket.emit('loggedOut');
+            socket.broadcast.emit('clientOffline',socket.email);
         })
 
         // disonnet event when a client disconnects

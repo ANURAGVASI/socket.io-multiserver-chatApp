@@ -5,8 +5,12 @@ import {withRouter} from 'react-router-dom'
 class ChatUser extends React.Component{
 
     logout=() => {
-        this.props.cookie.remove('user');
-        this.props.history.push("/");
+        // emiting logout event
+        this.props.socket.emit("logout");
+        this.props.socket.on("loggedOut",() => {
+            this.props.cookie.remove('user');
+            this.props.history.push("/");
+        })
     }
 
     render(){

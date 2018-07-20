@@ -21,8 +21,8 @@ export default class sidebar extends React.Component{
                             this.props.users.map((user,i) => {
                                 if(user!==this.state.Cuser)
                                 return(
-                                    <div>
-                                    <p className="sidebar-user" key={i}
+                                    <div key={i}>
+                                    <p className="sidebar-user"
                                     onClick={(e) => {this.props.chatWithuser(user)}} >
                                         {/* <i class="fa fa-circle" aria-hidden="true"></i>
                                      */}

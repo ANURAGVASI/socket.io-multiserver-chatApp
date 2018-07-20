@@ -6,28 +6,113 @@
 }
 
 .from-div{
-  margin-top: 20px;
-  text-align: right;
+  /* text-align: right; */
+  margin-top: 10px;
   color: white;
-  
 }
 
 .to-div{
-  margin-top: 20px;
   text-align: left;
+  margin-top: 10px;
   color: white;
 }
 .to-message{
  background-color: rgb(35, 180, 35);
  padding: 10px;
  margin-right: 400px;
- margin-top: 10px;
+ display:block;
  float: left;
 }
 .from-message{
   background-color: rgb(64, 185, 175);
  padding: 10px;
  margin-left: 400px;
- margin-top: 10px;
+ display: block;
  float: right;
 }
+.clear
+{
+    clear: both;
+} 
+
+/* span
+{
+    display: inline-block;
+    max-width: 500px;
+    background-color: white;
+    padding: 5px;
+    border-radius: 4px;
+    position: relative;
+    border-width: 1px;
+    border-style: solid;
+    border-color: grey;
+}
+
+left
+{
+    float: left;
+    background-color: rgb(35, 180, 35);
+}
+
+span.left:after
+{
+    content: "";
+    display: inline-block;
+    position: absolute;
+    left: -8.5px;
+    top: 7px;
+    height: 0px;
+    width: 0px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid white;
+}
+
+span.left:before
+{
+    content: "";
+    display: inline-block;
+    position: absolute;
+    left: -9px;
+    top: 7px;
+    height: 0px;
+    width: 0px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid black;
+}
+
+span.right:after
+{
+    content: "";
+    display: inline-block;
+    position: absolute;
+    right: -8px;
+    top: 6px;
+    height: 0px;
+    width: 0px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid #dbedfe;
+}
+
+span.right:before
+{
+    content: "";
+    display: inline-block;
+    position: absolute;
+    right: -9px;
+    top: 6px;
+    height: 0px;
+    width: 0px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 8px solid black;
+}
+
+span.right
+{
+    float: right;
+    background-color: #dbedfe;
+}*/
+

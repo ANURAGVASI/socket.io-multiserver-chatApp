@@ -74,7 +74,7 @@ class Chatroom extends React.Component{
 
                 socket.on('newClientOnline',(user) => {
                     console.log('new client connected',user);
-                    if(cookie.load('user').email!==user.email){
+                        if(cookie.load('user') && cookie.load('user').email!==user.email){
                         let olUsers = this.state.onlineUsers;
                         olUsers.push(user.email);
                         this.setState({onlineUsers: olUsers});
@@ -151,7 +151,7 @@ class Chatroom extends React.Component{
                     <Sidebar   chatWithuser={this.chatWithuser.bind(this)} cookie={cookie} users={this.state.onlineUsers} />
                 </div>
                 <div className="chat-window-parent" >
-                    <ChatUser cookie={cookie}  chattingWith={chattingWith} />
+                    <ChatUser socket={this.state.socket} cookie={cookie}  chattingWith={chattingWith} />
                     <ChatWindow chattingWith={chattingWith} messages={this.state.myMessages} />
                     <TextInput sentMessage={this.sentMessage.bind(this)} chatWithuser={chattingWith} socket={this.state.socket} /> 
                 </div>
